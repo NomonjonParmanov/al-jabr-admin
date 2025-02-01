@@ -1,6 +1,6 @@
 import GetQuestions from "./components/GetQuestions";
 import "./components/admin.scss";
-import Questions from "./components/questions";
+import Questions from "./components/Questions";
 import { Route, Routes } from "react-router-dom";
 function App() {
   return (
