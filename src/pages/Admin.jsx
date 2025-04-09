@@ -7,6 +7,7 @@ import { BsQuestionSquare } from "react-icons/bs";
 import Class from "./Class";
 import Topics from "./Topics";
 import Questions from "./Questions";
+import GetQuestions from "./GetQuestions";
 const Admin = () => {
   const navigate = useNavigate();
   const handleDelete = () => {
@@ -20,6 +21,7 @@ const Admin = () => {
         <Route path="/admin/class" element={<Class />} />
         <Route path="/admin/topics" element={<Topics />} />
         <Route path="/admin/questions" element={<Questions />} />
+        <Route path="/admin/getQuestions" element={<GetQuestions />} />
       </Routes>
       <aside className="sidebar">
         <h1>Admin Dashboard</h1>
@@ -46,6 +48,12 @@ const Admin = () => {
             <li>
               <BsQuestionSquare className="icon" />
               Questions{" "}
+            </li>
+          </NavLink>{" "}
+          <NavLink to="/admin/getQuestions">
+            <li>
+              <BsQuestionSquare className="icon" />
+              Get Questions{" "}
             </li>
           </NavLink>
         </ul>

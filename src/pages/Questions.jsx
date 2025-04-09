@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useGetClassesQuery } from "../context/classApi";
+import { useGetChapterQuery } from "../context/chapterApi";
+import { useGetTopicQuery } from "../context/topicsApi";
 
 const VariantInputs = ({ values, handleChange }) => {
   return Object.keys(values).map((key, index) => (
@@ -47,6 +50,9 @@ const VariantSelects = ({ uzVariants, ruVariants }) => {
 const Questions = () => {
   const [isMCQChecked, setIsMCQChecked] = useState(false);
   const [isOpenChecked, setIsOpenChecked] = useState(false);
+  const [selectedClass, setSelectedClass] = useState("");
+  const [selectedChapter, setSelectedChapter] = useState("");
+  const [selectedTopic, setSelectedTopic] = useState("");
   const [selectedImageOption, setSelectedImageOption] = useState("");
   const [selectedImageOption2, setSelectedImageOption2] = useState("");
   const [values, setValues] = useState({
@@ -61,6 +67,18 @@ const Questions = () => {
     variant5Uz: "",
     variant5Ru: "",
   });
+
+  const { data: classes } = useGetClassesQuery();
+  const { data: chapters } = useGetChapterQuery(selectedClass, {
+    skip: !selectedClass,
+  });
+  const { data: topics } = useGetTopicQuery(selectedChapter, {
+    skip: !selectedChapter,
+  });
+
+  useEffect(() => {
+    setSelectedTopic(""); // Reset topic when chapter changes
+  }, [selectedChapter]);
 
   const uzVariants = Object.entries(values)
     .filter(([key, value]) => key.includes("Uz") && value.trim() !== "")
@@ -88,6 +106,13 @@ const Questions = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Submitted Values:", {
+      ...values,
+      selectedClass,
+      selectedChapter,
+      selectedTopic,
+      type: isMCQChecked ? "MCQ" : "Open",
+    });
   };
 
   return (
@@ -95,15 +120,57 @@ const Questions = () => {
       <form onSubmit={handleSubmit}>
         {isMCQChecked && <h1>MCQ</h1>}
         {isOpenChecked && <h1>Open</h1>}
+
         <div className="selects">
-          <select name="class" id="class">
+          {/* Class Selection */}
+          <select
+            name="class"
+            id="class"
+            value={selectedClass}
+            onChange={(e) => {
+              setSelectedClass(e.target.value);
+              setSelectedChapter("");
+              setSelectedTopic("");
+            }}
+          >
             <option value="">Sinfni tanlang</option>
+            {classes?.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.name?.uz || cls.name?.ru}
+              </option>
+            ))}
           </select>
-          <select name="chapter" id="chapter">
+
+          {/* Chapter Selection */}
+          <select
+            name="chapter"
+            id="chapter"
+            value={selectedChapter}
+            onChange={(e) => setSelectedChapter(e.target.value)}
+            disabled={!selectedClass}
+          >
             <option value="">Chapter tanlang</option>
+            {chapters?.map((chapter) => (
+              <option key={chapter.id} value={chapter.id}>
+                {chapter.name?.uz || chapter.name?.ru}
+              </option>
+            ))}
           </select>
-          <select name="topics" id="topics">
+
+          {/* Topic Selection */}
+          <select
+            name="topics"
+            id="topics"
+            value={selectedTopic}
+            onChange={(e) => setSelectedTopic(e.target.value)}
+            disabled={!selectedChapter}
+          >
             <option value="">Topics tanlang</option>
+            {topics?.map((topic) => (
+              <option key={topic.id} value={topic.id}>
+                {topic.name}
+              </option>
+            ))}
           </select>
         </div>
 
@@ -135,7 +202,7 @@ const Questions = () => {
           <>
             <div className="check">
               <input
-                type="checkbox"
+                type="radio"
                 id="noImage"
                 checked={selectedImageOption === "noImage"}
                 onChange={() => setSelectedImageOption("noImage")}
@@ -143,7 +210,7 @@ const Questions = () => {
               <label htmlFor="noImage">Rasmsiz savollar</label>
 
               <input
-                type="checkbox"
+                type="radio"
                 id="imageQuestion"
                 checked={selectedImageOption === "imageQuestion"}
                 onChange={() => setSelectedImageOption("imageQuestion")}
@@ -153,7 +220,7 @@ const Questions = () => {
               </label>
 
               <input
-                type="checkbox"
+                type="radio"
                 id="imageBoth"
                 checked={selectedImageOption === "imageBoth"}
                 onChange={() => setSelectedImageOption("imageBoth")}
@@ -228,14 +295,14 @@ const Questions = () => {
           <div className="open">
             <div className="check2">
               <input
-                type="checkbox"
+                type="radio"
                 id="imageBoth2"
                 checked={selectedImageOption2 === "imageBoth2"}
                 onChange={() => setSelectedImageOption2("imageBoth2")}
               />
               <label htmlFor="imageBoth2">Rasmli savol</label>
               <input
-                type="checkbox"
+                type="radio"
                 id="noImage2"
                 checked={selectedImageOption2 === "noImage2"}
                 onChange={() => setSelectedImageOption2("noImage2")}
